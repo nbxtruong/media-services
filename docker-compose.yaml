@@ -1,0 +1,54 @@
+version: "3"
+services:
+  gerbera:
+    image: gerbera/gerbera
+    container_name: gerbera
+    network_mode: host
+    volumes:
+      - ./gerberaConfig:/var/run/gerbera/.config/gerbera
+      - ./content:/content:ro
+    restart: unless-stopped
+  # deluge:
+  #   image: ghcr.io/linuxserver/deluge
+  #   container_name: deluge
+  #   network_mode: host
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #   volumes:
+  #     - ./delugeConfig:/config
+  #     - ./content:/downloads
+  #   restart: unless-stopped
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent
+    container_name: qbittorrent
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Ho_Chi_Minh
+      - WEBUI_PORT=8112
+    volumes:
+      - ./qbittorrentConfig:/config
+      - ./content:/downloads
+    ports:
+      - 7777:7777
+      - 7777:7777/udp
+      - 8112:8112
+    restart: unless-stopped
+  netdata:
+    image: netdata/netdata
+    container_name: netdata
+    hostname: Media Services
+    ports:
+      - 19999:19999
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/os-release:/host/etc/os-release:ro
+    restart: unless-stopped
